@@ -1,0 +1,58 @@
+/* UserPanel.css */
+
+.user-panel-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+  }
+  
+  .user-panel-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .user-panel-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .user-panel-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .user-panel-back-button {
+    margin-top: 20px;
+    background-color: #ccc;
+    color: #000;
+  }
+  
+  .user-panel-message {
+    margin-top: 15px;
+    font-weight: bold;
+  }
+  
+  .user-panel-message.success {
+    color: green;
+  }
+  
+  .user-panel-message.error {
+    color: red;
+  }
+  
+  .user-panel-image {
+    border-radius: 8px;
+    margin: 10px 0;
+  }
+  

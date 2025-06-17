@@ -1,10 +1,11 @@
 import React, { useRef, useState } from "react";
+import "./userPanel.css";
 
 function UserPanel({ goBack }) {
   const [faceVerified, setFaceVerified] = useState(false);
   const [showEspStream, setShowEspStream] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(""); // הודעה למשתמש
+  const [message, setMessage] = useState("");
   const imgRef = useRef(null);
 
   const handleFaceRecognition = async () => {
@@ -12,7 +13,7 @@ function UserPanel({ goBack }) {
       setLoading(true);
       await fetch("http://localhost:5000/start-camera", { method: "POST" });
       setShowEspStream(true);
-      setTimeout(captureAndSendImage, 10000); // אחרי 10 שניות שולח תמונה לשרת
+      setTimeout(captureAndSendImage, 10000);
     } catch (error) {
       console.error("שגיאה בהפעלת מצלמה:", error);
     }
@@ -55,51 +56,10 @@ function UserPanel({ goBack }) {
     }, "image/jpeg");
   };
 
-  const styles = {
-    container: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100vh",
-      backgroundColor: "#f4f4f4",
-    },
-    card: {
-      backgroundColor: "#fff",
-      padding: 20,
-      borderRadius: 10,
-      boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-      textAlign: "center",
-    },
-    title: {
-      fontSize: 24,
-      marginBottom: 20,
-    },
-    button: {
-      padding: "10px 20px",
-      fontSize: 16,
-      borderRadius: 5,
-      border: "none",
-      backgroundColor: "#007bff",
-      color: "#fff",
-      cursor: "pointer",
-      marginTop: 10,
-    },
-    backButton: {
-      marginTop: 20,
-      backgroundColor: "#ccc",
-      color: "#000",
-    },
-    message: {
-      marginTop: 15,
-      fontWeight: "bold",
-      color: faceVerified ? "green" : "red",
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>כניסת משתמש</h2>
+    <div className="user-panel-container">
+      <div className="user-panel-card">
+        <h2 className="user-panel-title">כניסת משתמש</h2>
 
         {!faceVerified ? (
           <>
@@ -108,11 +68,11 @@ function UserPanel({ goBack }) {
                 <img
                   ref={imgRef}
                   id="espStream"
-                  src="http://192.168.1.1" // להחליף לכתובת של ESP
+                  className="user-panel-image"
+                  src="http://192.168.1.1"
                   alt="ESP Camera"
                   width="250"
                   height="200"
-                  style={{ borderRadius: 8, margin: "10px 0" }}
                 />
                 {loading && <p>מזהה פנים...</p>}
               </>
@@ -120,15 +80,30 @@ function UserPanel({ goBack }) {
               <p>המצלמה לא הופעלה עדיין</p>
             )}
 
-            <button onClick={handleFaceRecognition} style={styles.button} disabled={loading}>
+            <button
+              onClick={handleFaceRecognition}
+              className="user-panel-button"
+              disabled={loading}
+            >
               התחלת זיהוי פנים
             </button>
           </>
         ) : null}
 
-        {message && <p style={styles.message}>{message}</p>}
+        {message && (
+          <p
+            className={`user-panel-message ${
+              faceVerified ? "success" : "error"
+            }`}
+          >
+            {message}
+          </p>
+        )}
 
-        <button onClick={goBack} style={{ ...styles.button, ...styles.backButton }}>
+        <button
+          onClick={goBack}
+          className="user-panel-button user-panel-back-button"
+        >
           חזרה
         </button>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import AdminPanel from "./adminPanel";
-import UserPanel from "./userPanel";
+import AdminPanel from "./client/adminNisui";
+import UserPanel from "./client/nisui";
 
 function App() {
   const [screen, setScreen] = useState("home");

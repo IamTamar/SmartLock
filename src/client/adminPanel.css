@@ -1,0 +1,58 @@
+.admin-panel-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+  }
+  
+  .admin-panel-card {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 350px;
+  }
+  
+  .admin-panel-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .admin-panel-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: none;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    margin: 10px 0;
+    transition: background-color 0.3s ease;
+  }
+  
+  .admin-panel-button:hover {
+    background-color: #218838;
+  }
+  
+  .admin-panel-back-button {
+    background-color: #ccc;
+    color: #000;
+    margin-top: 20px;
+  }
+  
+  .admin-panel-message {
+    margin-top: 15px;
+    font-weight: bold;
+  }
+  
+  .admin-panel-message.success {
+    color: green;
+  }
+  
+  .admin-panel-message.error {
+    color: red;
+  }
+  
