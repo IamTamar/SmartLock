@@ -1,7 +1,9 @@
 📌 Project Overview
+
 This is a complete smart lock system combining embedded hardware and a full web interface. It uses ESP32-CAM to capture real-time video and transmit it over Wi-Fi, while a React frontend manages the user interface and authentication flow. A Python Flask backend handles face recognition using the face_recognition library.
 
 💡 Features
+
 🔴 Face recognition login for users and admins
 
 📷 Live video streaming from ESP32-CAM to React app
