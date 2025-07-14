@@ -27,4 +27,4 @@ Python + Flask backend with face recognition
 
 LCD via I2C, RGB LED & buzzer on ESP32
 
-HTTP communication between parts (/detect-face, /access)
+HTTP communication between parts
