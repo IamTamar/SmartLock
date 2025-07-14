@@ -1,135 +1,129 @@
-// import React, { useState } from 'react';
-// // import { recognizeFaceFromVideo, addUserDescriptor } from './faceService';
+import React, { useRef, useState, useEffect } from "react";
+import "./userPanel.css";
+import AdminDashboard from "./adminDashboard";
+import VideoStream from "./VideoStream"; 
 
-// function AdminPanel({ goBack }) {
-//   const [screen, setScreen] = useState('verify');
-//   const [verified, setVerified] = useState(false);
-//   const [password, setPassword] = useState('');
-//   const [newUsername, setNewUsername] = useState('');
-//   const [newPassword, setNewPassword] = useState('');
-//   const [users, setUsers] = useState([
-//     { id: 1, username: 'david123' },
-//     { id: 2, username: 'sara456' },
-//     { id: 3, username: 'admin1' },
-//   ]);
+function UserPanel({ goBack }) {
+    const [faceVerified, setFaceVerified] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
+    const [showAdmin, setShowAdmin] = useState(false);
+    const videoStreamRef = useRef(null); // ה-ref לרכיב VideoStream
 
-//   const handleVerify = async () => {
-//     const label = await recognizeFaceFromVideo();
-//     if (label === 'tamar' && password === 'admin123') {
-//       alert('✅ זוהית כמנהל');
-//       setVerified(true);
-//       setScreen('home');
-//     } else {
-//       alert('❌ זיהוי נכשל או סיסמה שגויה');
-//     }
-//   };
+    // פונקציה לשליחת נתונים ל-ESP (כפי שהוגדרה בתשובה הקודמת)
+    const sendToESP = async (isRecognized, isAdmin) => {
+        const isRecognizedValue = isRecognized ? 1 : 0;
+        const isAdminValue = isAdmin ? 1 : 0;
+        const espUrl = `http://192.168.1.100/access?is_recognized=${isRecognizedValue}&is_admin=${isAdminValue}`;
 
-//   const handleAddUser = async () => {
-//     if (!newUsername || !newPassword) {
-//       alert('אנא מלא שם משתמש וסיסמה');
-//       return;
-//     }
-//     const label = await recognizeFaceFromVideo();
-//     if (!label) {
-//       alert('לא זוהו פנים. נסה שוב');
-//       return;
-//     }
-//     addUserDescriptor(newUsername, label);
-//     setUsers([...users, { id: Date.now(), username: newUsername }]);
-//     alert('המשתמש נוסף בהצלחה');
-//     setScreen('home');
-//   };
+        try {
+            const httpReq = await fetch(espUrl);
+            const res = await httpReq.text();
+            console.log("תגובה מה-ESP:", res);
+            return true;
+        } catch (error) {
+            console.error("בעיה בבקשת HTTP ל-ESP:", error);
+            return false;
+        }
+    };
 
-//   const handleDelete = (id) => {
-//     setUsers(users.filter((user) => user.id !== id));
-//   };
+    const captureAndSendImage = async () => {
+        setLoading(true);
+        setMessage("מזהה פנים...");
 
-//   const renderScreen = () => {
-//     if (!verified && screen === 'verify') {
-//       return (
-//         <div>
-//           <h3>כניסת מנהל</h3>
-//           <p>הכנס סיסמה ולאחר מכן בצע זיהוי פנים</p>
-//           <input
-//             type="password"
-//             placeholder="סיסמה"
-//             value={password}
-//             onChange={(e) => setPassword(e.target.value)}
-//           />
-//           <br />
-//           <button onClick={handleVerify}>🔐 אמת זהות</button>
-//         </div>
-//       );
-//     }
+        // בדיקה שה-ref זמין ושהפונקציה captureFrame קיימת עליו
+        if (!videoStreamRef.current || !videoStreamRef.current.captureFrame) {
+            setMessage("שגיאה: זרם הוידאו אינו מוכן ללכידה.");
+            setLoading(false);
+            console.error("VideoStream component or captureFrame function not ready.");
+            return;
+        }
 
-//     switch (screen) {
-//       case 'addUser':
-//         return (
-//           <div>
-//             <h3>הוספת משתמש חדש</h3>
-//             <input
-//               type="text"
-//               placeholder="שם משתמש"
-//               value={newUsername}
-//               onChange={(e) => setNewUsername(e.target.value)}
-//             />
-//             <br />
-//             <input
-//               type="password"
-//               placeholder="סיסמה"
-//               value={newPassword}
-//               onChange={(e) => setNewPassword(e.target.value)}
-//             />
-//             <br />
-//             <button onClick={handleAddUser}>📷 צלם פנים והוסף</button>
-//             <br />
-//             <br />
-//             <button onClick={() => setScreen('home')}>חזור</button>
-//           </div>
-//         );
-//       case 'manageUsers':
-//         return (
-//           <div>
-//             <h3>רשימת משתמשים</h3>
-//             {users.length === 0 ? (
-//               <p>אין משתמשים רשומים.</p>
-//             ) : (
-//               <ul>
-//                 {users.map((user) => (
-//                   <li key={user.id}>
-//                     {user.username}{' '}
-//                     <button onClick={() => handleDelete(user.id)}>מחק</button>
-//                   </li>
-//                 ))}
-//               </ul>
-//             )}
-//             <br />
-//             <button onClick={() => setScreen('home')}>חזור</button>
-//           </div>
-//         );
-//       default:
-//         return (
-//           <div>
-//             <h2>פאנל ניהול</h2>
-//             <p>זוהית בהצלחה כמנהל.</p>
-//             <button onClick={() => setScreen('addUser')}>➕ הוסף משתמש חדש</button>
-//             <br />
-//             <br />
-//             <button onClick={() => setScreen('manageUsers')}>🧑‍💼 נהל משתמשים</button>
-//             <br />
-//             <br />
-//           </div>
-//         );
-//     }
-//   };
+        let blob = null; // הצהרה על המשתנה blob כאן
+        try {
+            // קוראים לפונקציה captureFrame מתוך רכיב VideoStream דרך ה-ref
+            blob = await videoStreamRef.current.captureFrame();
 
-//   return (
-//     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-//       {renderScreen()}
-//       <hr />
-//       <button onClick={goBack}>⬅ חזור למסך הראשי</button>
-//     </div>
-//   );
-// }
+            if (!blob) {
+                setMessage("שגיאה: לא נלכדה תמונה מהזרם.");
+                setLoading(false);
+                return;
+            }
 
-// export default AdminPanel;
+            const formData = new FormData();
+            formData.append("image", blob, "capture.jpg");
+
+            const response = await fetch("http://localhost:5000/detect-face", {
+                method: "POST",
+                body: formData,
+            });
+            const result = await response.json();
+            console.log("תוצאה מהשרת:", result);
+
+            if (result.is_recognized && result.is_admin) {
+                setFaceVerified(true);
+                setMessage(`פנים זוהו בהצלחה! מחובר כמנהל...`);
+            
+                const espSendSuccess = await sendToESP(true, true);
+            
+                if (espSendSuccess) {
+                    setMessage("זיהוי הצליח ✔ המערכת נפתחת...");
+                    setShowAdmin(true);
+                } else {
+                    setMessage("זוהה כמנהל, אך אירעה שגיאה בתקשורת עם המנעול.");
+                }
+            } else {
+                setFaceVerified(false);
+                setMessage("אזהרה חמורה: ניסיון פריצה למערכת");
+                await sendToESP(false, false);
+            }
+        } catch (error) { // שגיאות מלכידת התמונה או משליחה לשרת הפנים
+            console.error("שגיאה בתהליך זיהוי הפנים או לכידת תמונה:", error);
+            setMessage(`שגיאה: ${error.message || "שליחת תמונה לשרת"}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        console.log("UserPanel component mounted. Setting up auto-capture timer.");
+        const delayInSeconds = 5;
+        setMessage(`התמונה תילכד אוטומטית בעוד ${delayInSeconds} שניות...`);
+
+        const timer = setTimeout(() => {
+            console.log(`Time elapsed. Capturing image from stream.`);
+            captureAndSendImage();
+        }, delayInSeconds * 1000);
+
+        return () => {
+            clearTimeout(timer);
+            console.log("Auto-capture timer cleared.");
+        };
+    }, []);
+
+    return showAdmin ? (
+        <AdminDashboard goBack={goBack} />
+    ) : (
+        <div className="container">
+            <div className="card">
+                <h2 className="title">כניסת מנהל</h2>
+                {/* העברת ה-ref לרכיב VideoStream */}
+                <VideoStream ref={videoStreamRef} />
+                {!faceVerified && (
+                    <>
+                        {loading && <p>{message}</p>}
+                    </>
+                )}
+                {message && !loading && (
+                    <p className={`message ${faceVerified ? "success" : "error"}`}>
+                        {message}
+                    </p>
+                )}
+                <button onClick={goBack} className="button back">
+                    חזרה
+                </button>
+            </div>
+        </div>
+    );
+}
+export default UserPanel;

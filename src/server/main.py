@@ -17,7 +17,7 @@ ADMIN_NAME = "tamar"  # שם המנהל (לזיהוי בהרשאות)
 # def start_camera():
 #     try:
 #         # שולח בקשה ל-ESP32 להפעיל את הזרם
-#         esp_response = requests.get(ESP32_CAMERA_URL, timeout=10)
+#         esp_response = requests.get(`http://10.100.102.5`, timeout=10)
 #         return jsonify({"status": "success", "message": "camera started"}), 200
 #     except Exception as e:
 #         return jsonify({"status": "error", "message": f"Failed to contact ESP: {e}"}), 500
@@ -115,7 +115,7 @@ def addNewFace():
 
 #שליחת פרמטרים לבקר , האם זוהה או לא
 def notify_esp32(result):
-    esp32_ip = "http://192.168.1..."  # כתובת ה-IP של ה-ESP שלך
+    esp32_ip = "http://10.100.102.8"  # כתובת ה-IP של ה-ESP שלך
 
     try:
         params = {

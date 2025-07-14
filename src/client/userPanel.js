@@ -1,111 +1,116 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState , useEffect} from "react";
 import "./userPanel.css";
+import VideoStream from "./VideoStream"; 
+
 
 function UserPanel({ goBack }) {
   const [faceVerified, setFaceVerified] = useState(false);
-  const [showEspStream, setShowEspStream] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const imgRef = useRef(null);
+  const videoStreamRef = useRef(null); // ה-ref לרכיב VideoStream
 
-  const handleFaceRecognition = async () => {
+  const sendToESP = async (isRecognized, isAdmin) => {
+    const isRecognizedValue = isRecognized ? 1 : 0;
+    const isAdminValue = isAdmin ? 1 : 0;
+    const espUrl = `http://192.168.1.100/access?is_recognized=${isRecognizedValue}&is_admin=${isAdminValue}`;
+
     try {
-      setLoading(true);
-      await fetch("http://localhost:5000/start-camera", { method: "POST" });
-      setShowEspStream(true);
-      setTimeout(captureAndSendImage, 10000);
+        const httpReq = await fetch(espUrl);
+        const res = await httpReq.text();
+        console.log("תגובה מה-ESP:", res);
+        return true;
     } catch (error) {
-      console.error("שגיאה בהפעלת מצלמה:", error);
+        console.error("בעיה בבקשת HTTP ל-ESP:", error);
+        return false;
     }
-  };
-
+};
   const captureAndSendImage = async () => {
-    if (!imgRef.current) return;
+    setLoading(true);
+    setMessage("מזהה פנים...");
 
-    const canvas = document.createElement("canvas");
-    canvas.width = imgRef.current.width;
-    canvas.height = imgRef.current.height;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(imgRef.current, 0, 0, canvas.width, canvas.height);
+    // בדיקה שה-ref זמין ושהפונקציה captureFrame קיימת עליו
+    if (!videoStreamRef.current || !videoStreamRef.current.captureFrame) {
+        setMessage("שגיאה: זרם הוידאו אינו מוכן ללכידה.");
+        setLoading(false);
+        console.error("VideoStream component or captureFrame function not ready.");
+        return;
+    }
 
-    canvas.toBlob(async (blob) => {
-      const formData = new FormData();
-      formData.append("image", blob, "capture.jpg");
+    let blob = null; // הצהרה על המשתנה blob כאן
+    try {
+        // קוראים לפונקציה captureFrame מתוך רכיב VideoStream דרך ה-ref
+        blob = await videoStreamRef.current.captureFrame();
 
-      try {
+        if (!blob) {
+            setMessage("שגיאה: לא נלכדה תמונה מהזרם.");
+            setLoading(false);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("image", blob, "capture.jpg");
+
         const response = await fetch("http://localhost:5000/detect-face", {
-          method: "POST",
-          body: formData,
+            method: "POST",
+            body: formData,
         });
         const result = await response.json();
-        console.log("זיהוי מהשרת:", result);
+        console.log("תוצאה מהשרת:", result);
 
         if (result.is_recognized) {
-          setFaceVerified(true);
-          setMessage(`ברוכים הבאים, ${result.name}!`);
+            setFaceVerified(true);
+            setMessage(`ברוכים הבאים ${result.name} !` );
+            const espSendSuccess = await sendToESP(true, true);
+
+            if (!espSendSuccess) {
+              setMessage("ברוכים הבאים אירעה שגיאה בתקשורת עם המנעול.");
+            } 
         } else {
-          setFaceVerified(false);
-          setMessage("לא נפתח – פנים לא זוהו.");
+            setFaceVerified(false);
+            setMessage("אזהרה חמורה: ניסיון פריצה למערכת");
+            await sendToESP(false, false);
         }
-      } catch (error) {
-        console.error("שגיאה בשליחת תמונה לשרת:", error);
-        setMessage("אירעה שגיאה בזיהוי הפנים.");
-      } finally {
+    } catch (error) { // שגיאות מלכידת התמונה או משליחה לשרת הפנים
+        console.error("שגיאה בתהליך זיהוי הפנים או לכידת תמונה:", error);
+        setMessage(`שגיאה: ${error.message || "שליחת תמונה לשרת"}`);
+    } finally {
         setLoading(false);
-      }
-    }, "image/jpeg");
+    }
+};
+useEffect(() => {
+  console.log("UserPanel component mounted. Setting up auto-capture timer.");
+  const delayInSeconds = 3;
+  setMessage(`התמונה תילכד אוטומטית בעוד ${delayInSeconds} שניות...`);
+
+  const timer = setTimeout(() => {
+      console.log(`Time elapsed. Capturing image from stream.`);
+      captureAndSendImage();
+  }, delayInSeconds * 1000);
+
+  return () => {
+      clearTimeout(timer);
+      console.log("Auto-capture timer cleared.");
   };
+}, []);
 
   return (
     <div className="user-panel-container">
       <div className="user-panel-card">
         <h2 className="user-panel-title">כניסת משתמש</h2>
-
-        {!faceVerified ? (
-          <>
-            {showEspStream ? (
-              <>
-                <img
-                  ref={imgRef}
-                  id="espStream"
-                  className="user-panel-image"
-                  src="http://192.168.1.1"
-                  alt="ESP Camera"
-                  width="250"
-                  height="200"
-                />
-                {loading && <p>מזהה פנים...</p>}
-              </>
-            ) : (
-              <p>המצלמה לא הופעלה עדיין</p>
-            )}
-
-            <button
-              onClick={handleFaceRecognition}
-              className="user-panel-button"
-              disabled={loading}
-            >
-              התחלת זיהוי פנים
-            </button>
-          </>
-        ) : null}
-
-        {message && (
-          <p
-            className={`user-panel-message ${
-              faceVerified ? "success" : "error"
-            }`}
-          >
-            {message}
-          </p>
-        )}
-
-        <button
-          onClick={goBack}
-          className="user-panel-button user-panel-back-button"
-        >
-          חזרה
-        </button>
+        <VideoStream ref={videoStreamRef} />
+        {!faceVerified && (
+                    <>
+                        {loading && <p>{message}</p>}
+                    </>
+                )}
+                {message && !loading && (
+                    <p className={`message ${faceVerified ? "success" : "error"}`}>
+                        {message}
+                    </p>
+                )}
+                <button onClick={goBack} className="button back">
+                    חזרה
+                </button>
       </div>
     </div>
   );
