@@ -1,70 +1,28 @@
-# Getting Started with Create React App
+📌 Project Overview
+This is a complete smart lock system combining embedded hardware and a full web interface. It uses ESP32-CAM to capture real-time video and transmit it over Wi-Fi, while a React frontend manages the user interface and authentication flow. A Python Flask backend handles face recognition using the face_recognition library.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+💡 Features
+🔴 Face recognition login for users and admins
 
-## Available Scripts
+📷 Live video streaming from ESP32-CAM to React app
 
-In the project directory, you can run:
+🧠 Flask backend that processes image blobs and detects faces
 
-### `npm start`
+🔓 Lock control via ESP32 with RGB LED, buzzer, and LCD
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+⚙️ Admin panel (React) for adding users with face data and UserPanel for user recognition
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+🌐 Wi-Fi communication between frontend, backend, and ESP device
 
-### `npm test`
+📁 Faces database stored locally or in browser storage (IndexedDB)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+🧩 Main Technologies
+ESP32-CAM for video streaming and peripheral control
 
-### `npm run build`
+React.js frontend 
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Python + Flask backend with face recognition
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+LCD via I2C, RGB LED & buzzer on ESP32
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+HTTP communication between parts (/detect-face, /access)
